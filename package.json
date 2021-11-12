@@ -1,0 +1,48 @@
+{
+  "name": "@code-dungeon/purify",
+  "version": "0.0.1",
+  "description": "Useful for plugging into express or JSON.stringify to get a string with circular references remove and useful strings for errors",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "files": [
+    "dist/",
+    "docs/"
+  ],
+  "scripts": {
+    "test:coverage": "yardstick coverage",
+    "lint": "tslint --project tsconfig.json --format verbose \"src/**/*.ts\"",
+    "lint:fix": "tslint --project tsconfig.json --fix --format verbose \"src/**/*.ts\"",
+    "build": "tsc --version && tsc --pretty",
+    "build:docs": "node_modules/.bin/typedoc --readme none --excludeExternals --excludePrivate --mode file --out docs/html src",
+    "build:readme": "node_modules/.bin/typedoc --theme markdown --readme none --excludeExternals --excludePrivate --mode file --out docs/markdown src",
+    "prepare": "husky install .github/hooks",
+    "test:unit": "yardstick unit",
+    "test:mutation": "yardstick mutation",
+    "test:unit:watch": "yardstick unit --w"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:code-dungeon/purify.git"
+  },
+  "config": {
+    "cz-customizable": {
+      "config": ".github/commit-config.js"
+    }
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@code-dungeon/commit-format": "^0.0.2",
+    "@code-dungeon/typescript-lint": "^0.0.1",
+    "@code-dungeon/yardstick": "^0.0.3",
+    "husky": "^7.0.0",
+    "ts-node": "^10.4.0",
+    "tslint": "^6.1.3",
+    "typedoc": "^0.22.8",
+    "typedoc-plugin-markdown": "^3.11.3",
+    "typescript": "^4.4.4"
+  },
+  "directories": {
+    "doc": "docs",
+    "test": "test"
+  }
+}
