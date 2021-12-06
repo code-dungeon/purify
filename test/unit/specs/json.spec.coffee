@@ -2,7 +2,8 @@ json = importModule('index').json
 
 describe 'JSON', ->
 	describe '#purify', ->
-		When -> @result = json.purify(@data)
+		Given -> @addStack = true
+		When -> @result = json.purify(@data, @addStack)
 
 		describe 'plain object', ->
 			Given -> @data = {a:'a'}
@@ -43,11 +44,21 @@ describe 'JSON', ->
 			Given -> 
 				@errorMessage = 'something bad happened'
 				@data = new Error(@errorMessage)
-			Then ->
-				@result.should.not.be.undefined
-				@result.errorType.should.equal('Error')
-				@result.message.should.equal(@errorMessage)
-				@result.stack.should.be.an('Array')
+
+			describe 'with stack', ->
+				Then ->
+					@result.should.not.be.undefined
+					@result.errorType.should.equal('Error')
+					@result.message.should.equal(@errorMessage)
+					@result.stack.should.be.an('Array')
+			
+			describe 'without stack', ->
+				Given -> @addStack = false
+				Then ->
+					@result.should.not.be.undefined
+					@result.errorType.should.equal('Error')
+					@result.message.should.equal(@errorMessage)
+					expect(@result.stack).to.be.undefined
 
 		describe 'object has a circular reference', ->
 			Given ->
@@ -87,27 +98,11 @@ describe 'JSON', ->
 				@result.should.be.a('string')
 				@result.should.equal(JSON.stringify(@data, null,2))
 
-	describe '#safeStringify', ->
-		Given -> @data = {one:'one', two:{toJSON: -> 'two'}}
-		When -> @result = json.safeStringify(@data, @format)
-
-		describe 'with format', ->
-			Given -> @format = true
-			Then ->
-				@result.should.be.a('string')
-				@result.should.equal('{\n  "one": "one",\n  "two": "two"\n}')
-		
-		describe 'without format', ->
-			Given -> @format = false
-			Then ->
-				@result.should.be.a('string')
-				@result.should.equal('{"one":"one","two":"two"}')
-
 	describe '#replacer', ->
 		Given -> 
 			@data = {one:{value:1}}
 			@data.two = @data.one
-		When -> @result = JSON.stringify(@data, json.replacer)
+		When -> @result = JSON.stringify(@data, json.getReplacer())
 		Then ->
 			@result.should.be.a('string')
 			@result.should.equal('{"one":{"value":1},"two":"[Circular]"}')

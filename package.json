@@ -1,6 +1,6 @@
 {
   "name": "@code-dungeon/purify",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Useful for plugging into express or JSON.stringify to get a string with circular references remove and useful strings for errors",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",

@@ -1,4 +1,10 @@
 export namespace json {
+  export interface PrintableError {
+    errorType: string;
+    message: string;
+    stack?: Array<string>;
+  }
+
   function safeGetValueFromPropertyOnObject(obj: any, property: string): any {
     try {
       return obj[property];
@@ -8,7 +14,7 @@ export namespace json {
     }
   }
 
-  function ensureProperties(data: any): any {
+  function ensureProperties(data: any, addStackToError: boolean): any {
     const seen: Set<any> = new Set();
 
     function visit(child: any): any {
@@ -36,12 +42,17 @@ export namespace json {
       }
 
       if (child instanceof Error) {
-        const stack = child.stack;
-        return {
+        const error: PrintableError = {
           errorType: child.constructor.name,
-          message: child.message,
-          stack: stack.split('\n')
+          message: child.message
         };
+
+        if (addStackToError) {
+          const stack = child.stack;
+          error.stack = stack.split('\n');
+        }
+
+        return error;
       }
 
       return Object.getOwnPropertyNames(child).reduce((result: any, key: string) => {
@@ -53,27 +64,32 @@ export namespace json {
     return visit(data);
   }
 
-  export function purify(data: any): any {
-    return ensureProperties(data);
+  export function purify(data: any, addStackToError: boolean = true): any {
+    return ensureProperties(data, addStackToError);
   }
 
-  export function replacer(key: string, value: any): any {
-    if (key === '') {
-      return purify(value);
-    }
-    return value;
+  export interface Replacer {
+    (key: string, value: any): any;
   }
 
-  export function stringify(data: any, format: boolean): string {
+  export function getReplacer(addStackToError: boolean): Replacer {
+    return function replacer(key: string, value: any): any {
+      if (key === '') {
+        return purify(value, addStackToError);
+      }
+      return value;
+    };
+  }
+
+  export function stringify(data: any, format: boolean, addStackToError: boolean = true): string {
+    const replacer: Replacer = getReplacer(addStackToError);
+    let result: string;
     if (format) {
-      return JSON.stringify(data, replacer, 2);
+      result = JSON.stringify(data, replacer, 2);
+    } else {
+      result = JSON.stringify(data, replacer);
     }
 
-    return JSON.stringify(data);
-  }
-
-  export function safeStringify(data: any, format: boolean): string {
-    const cleaned: any = purify(data);
-    return stringify(cleaned, format);
+    return result;
   }
 }
